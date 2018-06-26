@@ -37,7 +37,7 @@ def channels_list_by_username(service, **kwargs):
 #get all the video data from based on channel's playlist ID
 def fetch_all_videos_from_playlistId(service, playlistId):
     results = service.playlistItems().list(
-        part='snippet,contentDetails',
+        part='contentDetails',
         playlistId=playlistId,
         maxResults=50
     ).execute()
@@ -47,7 +47,7 @@ def fetch_all_videos_from_playlistId(service, playlistId):
     #repeat until there isn't another page of items
     while ('nextPageToken' in results):
         nextPage = service.playlistItems().list(
-            part='snippet,contentDetails',
+            part='contentDetails',
             playlistId=playlistId,
             maxResults=50,
             pageToken=nextPageToken
@@ -83,7 +83,5 @@ if __name__ == '__main__':
     #get list of video data
     listOfVideos = fetch_all_videos_from_playlistId(service, playlistId)
 
-    print(listOfVideos)
-    
     with open('data.json','w') as outfile:
         json.dump(listOfVideos,outfile)
