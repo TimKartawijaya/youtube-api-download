@@ -66,6 +66,29 @@ def fetch_all_videos_from_playlistId(service, playlistId):
 #         results['items'][0]['statistics']['viewCount']))
 
 
+def get_all_videos_from_videoList(videoList):
+    
+    #get first item
+    firstVideoId = videoList['items'][0]['contentDetails']['videoId']
+    results = service.videos().list(
+            part='snippet,contentDetails,statistics',
+            id = firstVideoId
+            ).execute()
+
+    #get the rest
+    
+    for playlistItemIndex in range(1,videoList['pageInfo']['totalResults']):
+        videoId =  videoList['items'][playlistItemIndex]['contentDetails']['videoId']
+        nextResult = service.videos().list(
+            part='snippet,contentDetails,statistics',
+            id = videoId
+        ).execute()
+
+        results['items'] = results['items'] + nextResult['items']
+
+    return results
+        
+
 if __name__ == '__main__':
     # When running locally, disable OAuthlib's HTTPs verification. When
     # running in production *do not* leave this option enabled.
@@ -81,7 +104,11 @@ if __name__ == '__main__':
     playlistId = channels['items'][0]['contentDetails']['relatedPlaylists']['uploads']
 
     #get list of video data
-    listOfVideos = fetch_all_videos_from_playlistId(service, playlistId)
+    videoList = fetch_all_videos_from_playlistId(service, playlistId)
+
+    #get ID of a video 
+    videoData = get_all_videos_from_videoList(videoList)
+
 
     with open('data.json','w') as outfile:
-        json.dump(listOfVideos,outfile)
+        json.dump(videoData,outfile)
